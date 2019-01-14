@@ -1,6 +1,3 @@
-
-
-
 /*
  * Create a list that holds all of your cards
  */
@@ -43,10 +40,11 @@ function shuffle(array) {
     return array;
 }
 
+const deck = document.querySelector('.deck');
 
 
 function initGame() {
-    const deck = document.querySelector('.deck');
+
     console.log(deck)
     let cardHTML = shuffle(cards).map(function (card) {
         return generateCard(card);
@@ -54,7 +52,6 @@ function initGame() {
     });
 
     deck.innerHTML = cardHTML.join('');
-    console.log("game loaded")
 };
 
 
@@ -74,59 +71,100 @@ initGame();
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
 
-
-let starsList = document.querySelectorAll(".stars li");
+/* DOM variables */
+const starsList = document.querySelectorAll(".stars li");
 const restartBtn = document.querySelector(".restart");
 const moves = document.querySelector(".moves");
 const allCards = document.querySelectorAll(".card");
+const timer = document.querySelector(".timer-display");
 
 let moveCounter = 0;
 let openCards = [];
 
+/* variable to be used in timer function*/
+let time = 0;
+let timerRunning = false;
+
+let playerWon = false;
 
 
+/* MAIN EVENT */
 allCards.forEach(function (card) {
     card.addEventListener("click", function showCard(e) {
         const targetCard = e.target;
+        /* if timmerRunning = false, start the clock and set timerRunning to true  */
+        if (!timerRunning) {
+            startTimer();
+            timerRunning = true;
+        }
+
+
         //run if card is not already showing. prevents adding open card to array twice
         if (!targetCard.classList.contains("show") && !targetCard.classList.contains("open") && !targetCard.classList.contains("match") && openCards.length < 2) {
             //add current card to array of open cards and show
             // openCards.push(card);
             // card.classList.add("open", "show");
             toggleCard(targetCard);
-            incMoves();
+
 
             /* Remove event listener for matched cards */
             if (openCards.length == 2) {
                 //if cards match, lock
                 if (openCards[0].dataset.card == openCards[1].dataset.card) {
-                    openCards.forEach(function (card) {
-                        card.removeEventListener("click", showCard)
-                    })
+                    // openCards.forEach(function (card) {
+                    //     card.removeEventListener("click", showCard)
+                    // })
                     matchCards();
+                    incMoves();
 
                 } else {
                     //wait 1 second. if there are 2 cards in array, hide them
                     setTimeout(function () {
                         hideOpenCards();
+                        incMoves();
 
                     }, 1000)
                 }
             };
-        } else {
-
         }
-
-
     });
 });
 
 
+
+/* Start and display the timer when user clicks on deck*/
+
+
+function startTimer() {
+    // while (timerRunning === true) {
+        var timerClock = setInterval(function () {
+            time++;
+            displayTime();
+        }, 1000)
+    // }
+};
+
+function displayTime() {
+    let min = Math.floor(time / 60);
+    let sec = time % 60;
+    if (sec < 10 && min < 10) {
+        timer.innerHTML = `0${min}:0${sec}`
+    } else if (sec < 10) {
+        timer.innerHTML = `${min}:0${sec}`
+    } else {
+        timer.innerHTML = `${min}:${sec}`
+    }
+}
+
+
+
+/* toggle displaying card face */
 function toggleCard(card) {
     openCards.push(card);
     card.classList.add("open", "show");
 }
 
+/* mark selected cards as a match */
 function matchCards() {
     openCards.forEach(function (card) {
         card.classList.add("match");
@@ -136,6 +174,7 @@ function matchCards() {
     })
 };
 
+/*hide selected cards that do not match */
 function hideOpenCards() {
     openCards.forEach(function (card) {
         card.classList.remove("open", "show");
@@ -143,6 +182,7 @@ function hideOpenCards() {
     openCards = [];
 };
 
+/* increase the number of moves and set score in stars */
 function incMoves() {
     moveCounter += 1;
     moves.innerText = moveCounter;
@@ -152,7 +192,6 @@ function incMoves() {
         //if player uses more than 18 moves, but less than 24, deduct one star
         for (i = 0; i < starsList.length; i++) {
             if (i > 1) {
-                console.log("bad score")
                 starsList[i].style.visibility = "collapse";
             }
         }
@@ -165,3 +204,12 @@ function incMoves() {
         }
     }
 };
+
+
+function restartGame() {
+    console.log("reset clicked");
+    deck.innerHTML = '';
+    initGame();
+}
+
+restartBtn.addEventListener("click", restartGame);
