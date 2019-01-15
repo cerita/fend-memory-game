@@ -11,6 +11,18 @@ const cards = ['fa-diamond', 'fa-diamond',
     'fa-bomb', 'fa-bomb'
 ];
 
+let moveCounter = 0;
+let openCards = [];
+
+/* variable to be used in timer function*/
+let time = 0;
+let timerRunning = false;
+
+/* winning condition variables*/
+let playerWon = false;
+let totalMatches = 8;
+let numOfMatches;
+
 function generateCard(card) {
     return `<li class="card" data-card="${card}"><i class="fa ${card}"></i></li>`;
 }
@@ -42,22 +54,16 @@ function shuffle(array) {
 
 const deck = document.querySelector('.deck');
 
-
 function initGame() {
-
     console.log(deck)
-    let cardHTML = shuffle(cards).map(function (card) {
+    cardHTML = shuffle(cards).map(function (card) {
         return generateCard(card);
-
     });
-
     deck.innerHTML = cardHTML.join('');
+    numOfMatches = 0;
 };
 
-
-
 initGame();
-
 
 
 /*
@@ -71,76 +77,66 @@ initGame();
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
 
+
 /* DOM variables */
 const starsList = document.querySelectorAll(".stars li");
 const restartBtn = document.querySelector(".restart");
 const moves = document.querySelector(".moves");
-const allCards = document.querySelectorAll(".card");
 const timer = document.querySelector(".timer-display");
-
-let moveCounter = 0;
-let openCards = [];
-
-/* variable to be used in timer function*/
-let time = 0;
-let timerRunning = false;
-
-let playerWon = false;
-
+const allCards = document.querySelectorAll(".card");
 
 /* MAIN EVENT */
-allCards.forEach(function (card) {
-    card.addEventListener("click", function showCard(e) {
-        const targetCard = e.target;
-        /* if timmerRunning = false, start the clock and set timerRunning to true  */
-        if (!timerRunning) {
-            startTimer();
-            timerRunning = true;
-        }
-
-
-        //run if card is not already showing. prevents adding open card to array twice
-        if (!targetCard.classList.contains("show") && !targetCard.classList.contains("open") && !targetCard.classList.contains("match") && openCards.length < 2) {
-            //add current card to array of open cards and show
-            // openCards.push(card);
-            // card.classList.add("open", "show");
-            toggleCard(targetCard);
-
-
-            /* Remove event listener for matched cards */
-            if (openCards.length == 2) {
-                //if cards match, lock
-                if (openCards[0].dataset.card == openCards[1].dataset.card) {
-                    // openCards.forEach(function (card) {
-                    //     card.removeEventListener("click", showCard)
-                    // })
-                    matchCards();
-                    incMoves();
-
-                } else {
-                    //wait 1 second. if there are 2 cards in array, hide them
-                    setTimeout(function () {
-                        hideOpenCards();
+function cardListener() {
+    allCards.forEach(function (card) {
+        card.addEventListener("click", function showCard(e) {
+            const targetCard = e.target;
+            /* if timmerRunning = false, start the clock and set timerRunning to true  */
+            if (!timerRunning) {
+                startTimer();
+                timerRunning = true;
+            }
+            //if the target card is not already showing, not already matched, and there aren't already 2 cards showing...
+            if (!targetCard.classList.contains("show") && !targetCard.classList.contains("open") && !targetCard.classList.contains("match") && openCards.length < 2) {
+                //add current card to array of open cards and show
+                toggleCard(targetCard);
+                /* Remove event listener for matched cards */
+                if (openCards.length == 2) {
+                    //if cards match, keep user from being able to click them
+                    //count as a move
+                    if (openCards[0].dataset.card == openCards[1].dataset.card) {
+                        matchCards();
                         incMoves();
+                        if (numOfMatches === totalMatches) {
+                            playerWon = true;
+                            playerWins();
+                        }
+                    } else {
+                        //wait 1 second. if there are 2 cards in array, hide them
+                        setTimeout(function () {
+                            hideOpenCards();
+                            incMoves();
+                        }, 1000)
+                    }
+                };
+            } //end if statement
+        });
+    }); //end forEach
+}
 
-                    }, 1000)
-                }
-            };
-        }
-    });
-});
-
+// initGame();
+cardListener();
 
 
 /* Start and display the timer when user clicks on deck*/
 
+let timerClock;
 
 function startTimer() {
     // while (timerRunning === true) {
-        var timerClock = setInterval(function () {
-            time++;
-            displayTime();
-        }, 1000)
+    timerClock = setInterval(function () {
+        time++;
+        displayTime();
+    }, 1000)
     // }
 };
 
@@ -154,6 +150,10 @@ function displayTime() {
     } else {
         timer.innerHTML = `${min}:${sec}`
     }
+}
+
+function stopTimer() {
+    clearInterval(timerClock);
 }
 
 
@@ -172,6 +172,7 @@ function matchCards() {
         card.classList.remove("show");
         openCards = [];
     })
+    numOfMatches++;
 };
 
 /*hide selected cards that do not match */
@@ -188,14 +189,14 @@ function incMoves() {
     moves.innerText = moveCounter;
 
     //set star score
-    if (moveCounter > 18 && moveCounter <= 24) {
+    if (moveCounter > 12 && moveCounter <= 18) {
         //if player uses more than 18 moves, but less than 24, deduct one star
         for (i = 0; i < starsList.length; i++) {
             if (i > 1) {
                 starsList[i].style.visibility = "collapse";
             }
         }
-    } else if (moveCounter > 24 && moveCounter <= 32) {
+    } else if (moveCounter > 18 && moveCounter <= 24) {
         //if player uses more than 24 moves, but less than 32, deduct another star
         for (i = 0; i < starsList.length; i++) {
             if (i > 0) {
@@ -205,11 +206,14 @@ function incMoves() {
     }
 };
 
-
 function restartGame() {
-    console.log("reset clicked");
-    deck.innerHTML = '';
-    initGame();
+    location.reload();
 }
 
 restartBtn.addEventListener("click", restartGame);
+
+
+function playerWins() {
+    stopTimer();
+    console.log("player wins");
+}
