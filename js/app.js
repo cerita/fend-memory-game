@@ -140,9 +140,12 @@ function startTimer() {
     // }
 };
 
+let min;
+let sec;
+
 function displayTime() {
-    let min = Math.floor(time / 60);
-    let sec = time % 60;
+    min = Math.floor(time / 60);
+    sec = time % 60;
     if (sec < 10 && min < 10) {
         timer.innerHTML = `0${min}:0${sec}`
     } else if (sec < 10) {
@@ -183,6 +186,8 @@ function hideOpenCards() {
     openCards = [];
 };
 
+let score;
+
 /* increase the number of moves and set score in stars */
 function incMoves() {
     moveCounter += 1;
@@ -194,16 +199,22 @@ function incMoves() {
         for (i = 0; i < starsList.length; i++) {
             if (i > 1) {
                 starsList[i].style.visibility = "collapse";
+                score = starsList.length - 1;
             }
         }
+        console.log(score);
     } else if (moveCounter > 18 && moveCounter <= 24) {
         //if player uses more than 24 moves, but less than 32, deduct another star
         for (i = 0; i < starsList.length; i++) {
             if (i > 0) {
                 starsList[i].style.visibility = "collapse";
+                score = starsList.length - 2;
             }
         }
+        console.log(score);
     }
+
+
 };
 
 function restartGame() {
@@ -212,8 +223,12 @@ function restartGame() {
 
 restartBtn.addEventListener("click", restartGame);
 
+const winnerScoreDisplay = document.querySelector('.winner-score');
 
 function playerWins() {
     stopTimer();
     console.log("player wins");
+
+    //modal pops up, shows score and time
+    console.log(`player made ${moveCounter} moves and got a score of ${score} in ${min} minutes and ${sec} seconds`);
 }
