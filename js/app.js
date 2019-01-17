@@ -112,12 +112,13 @@ function cardListener() {
                         }
                     } else {
                         //wait 1 second. if there are 2 cards in array, hide them
-                        openCards[0].classList.add("not-match");
-                        openCards[1].classList.add("not-match");
+                        notMatchCards();
                         setTimeout(function () {
                             hideOpenCards();
                             incMoves();
+                            console.log(score)
                         }, 800)
+
                     }
                 };
             } //end if statement
@@ -180,11 +181,20 @@ function matchCards() {
     numOfMatches++;
 };
 
+function notMatchCards() {
+    openCards.forEach(function (card) {
+        card.classList.add("not-match");
+        setTimeout(function () {
+            card.classList.remove("not-match");
+        }, 1000)
+        
+    })
+}
+
 /*hide selected cards that do not match */
 function hideOpenCards() {
     openCards.forEach(function (card) {
-        card.classList.remove("not-match");
-        card.classList.remove("open", "show");
+        card.classList.remove("open", "show", "not-match");
     });
     openCards = [];
 };
@@ -195,7 +205,6 @@ let score;
 function incMoves() {
     moveCounter += 1;
     moves.innerText = moveCounter;
-
     //set star score
     if (moveCounter > 12 && moveCounter <= 18) {
         //if player uses more than 18 moves, but less than 24, deduct one star
@@ -205,7 +214,6 @@ function incMoves() {
                 score = starsList.length - 1;
             }
         }
-        console.log(score);
     } else if (moveCounter > 18 && moveCounter <= 24) {
         //if player uses more than 24 moves, but less than 32, deduct another star
         for (i = 0; i < starsList.length; i++) {
@@ -214,7 +222,8 @@ function incMoves() {
                 score = starsList.length - 2;
             }
         }
-        console.log(score);
+    } else {
+        score = 3;
     }
 };
 
@@ -224,7 +233,6 @@ function restartGame() {
 
 restartBtn.addEventListener("click", restartGame);
 
-
 const modalOverlay = document.querySelector('.modal-overlay');
 const modal = document.querySelector('.modal');
 const winnerMoves = document.querySelector('.winner-moves');
@@ -232,17 +240,14 @@ const winnerTime = document.querySelector('.winner-time');
 const winnerScore = document.querySelector('.winner-score');
 const winnerRestart = document.querySelector('.winner-restart');
 
-winnerRestart.addEventListener("click", restartGame);
-
 
 function playerWins() {
     stopTimer();
-    console.log("player wins");
-
     //modal pops up, shows score and time
-    // console.log(`player made ${moveCounter} moves and got a score of ${score} in ${min} minutes and ${sec} seconds`);
     modalOverlay.classList.remove("hidden");
-    winnerMoves.innerText = `You did it in ${moveCounter} moves1`
+    winnerMoves.innerText = `You did it in ${moveCounter} moves`;
     winnerTime.innerText = `You did it in ${min} minutes and ${sec} seconds`;
-    winnerScore.innerText =  `Your score is ${score}`;
+    winnerScore.innerText = `Your score is ${score} stars`;
 }
+
+winnerRestart.addEventListener("click", restartGame);
