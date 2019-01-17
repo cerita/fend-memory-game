@@ -112,10 +112,12 @@ function cardListener() {
                         }
                     } else {
                         //wait 1 second. if there are 2 cards in array, hide them
+                        openCards[0].classList.add("not-match");
+                        openCards[1].classList.add("not-match");
                         setTimeout(function () {
                             hideOpenCards();
                             incMoves();
-                        }, 1000)
+                        }, 800)
                     }
                 };
             } //end if statement
@@ -181,6 +183,7 @@ function matchCards() {
 /*hide selected cards that do not match */
 function hideOpenCards() {
     openCards.forEach(function (card) {
+        card.classList.remove("not-match");
         card.classList.remove("open", "show");
     });
     openCards = [];
@@ -213,8 +216,6 @@ function incMoves() {
         }
         console.log(score);
     }
-
-
 };
 
 function restartGame() {
@@ -223,12 +224,25 @@ function restartGame() {
 
 restartBtn.addEventListener("click", restartGame);
 
-const winnerScoreDisplay = document.querySelector('.winner-score');
+
+const modalOverlay = document.querySelector('.modal-overlay');
+const modal = document.querySelector('.modal');
+const winnerMoves = document.querySelector('.winner-moves');
+const winnerTime = document.querySelector('.winner-time');
+const winnerScore = document.querySelector('.winner-score');
+const winnerRestart = document.querySelector('.winner-restart');
+
+winnerRestart.addEventListener("click", restartGame);
+
 
 function playerWins() {
     stopTimer();
     console.log("player wins");
 
     //modal pops up, shows score and time
-    console.log(`player made ${moveCounter} moves and got a score of ${score} in ${min} minutes and ${sec} seconds`);
+    // console.log(`player made ${moveCounter} moves and got a score of ${score} in ${min} minutes and ${sec} seconds`);
+    modalOverlay.classList.remove("hidden");
+    winnerMoves.innerText = `You did it in ${moveCounter} moves1`
+    winnerTime.innerText = `You did it in ${min} minutes and ${sec} seconds`;
+    winnerScore.innerText =  `Your score is ${score}`;
 }
