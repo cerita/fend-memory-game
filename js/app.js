@@ -222,8 +222,6 @@ function incMoves() {
                 score = starsList.length - 2;
             }
         }
-    } else {
-        score = 3;
     }
 };
 
